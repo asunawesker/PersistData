@@ -1,21 +1,50 @@
-import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import * as React from 'react';
+import { Button, StyleSheet, Text, View } from 'react-native';
 
-export default function App() {
+// Usamos el hook useContext cuando nuestra app tiene un state que debe ser accesible
+// desde muchos componentes que estén anidados
+
+// Lo primero que debemos hacer es importar el hook dentro del .js 
+// import React, { useState, createContext } from “react”;
+
+// Creamos el context
+const CounterContext = React.createContext(0);
+
+const useCounter = () => React.useContext(CounterContext);
+
+// Inicializamos el context con valores predeterminados
+const CounterProvider = ({ children }) => {
+  const [count, setCount] = React.useState(0);
+
+  const increment = () => setCount(c => c + 1);
+  const decrement = () => setCount(c => c - 1);
+
+  // Exportamos el componente con los valores que estarán disponibles de forma global
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
+    <CounterContext.Provider value={{ count, increment, decrement }}>
+      {children}
+    </CounterContext.Provider>
+  );
+};
+
+const App = () => {
+  // Usamos los valores del context
+  const { count, increment, decrement } = useCounter();
+
+  // O podemos utilizar 
+  // const { count, increment, decrement } = React.useContext(CounterContext);
+
+  return (
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+      <Text>{count}</Text>
+      <Button title="Increment" onPress={() => increment()} />
+      <Button title="Decrement" onPress={() => decrement()} />
     </View>
   );
-}
+};
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+export default () => (
+  <CounterProvider>
+    <App />
+  </CounterProvider>
+);
